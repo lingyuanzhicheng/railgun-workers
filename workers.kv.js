@@ -38,17 +38,6 @@ export default {
             if (!upgradeHeader || upgradeHeader !== 'websocket') {
                 const 路径 = url.pathname.toLowerCase();
 
-                if (env.URL302) {
-                    return Response.redirect(env.URL302, 302);
-                } else if (env.URL) {
-                    return await 代理URL(env.URL, url);
-                } else if (路径 === '/') {
-                    return new Response(await nginx(), {
-                        status: 200,
-                        headers: { 'Content-Type': 'text/html; charset=UTF-8' },
-                    });
-                }
-
                 if (!路径.startsWith('/socks5://') && !路径.startsWith('/http://') && !路径.includes('proxyip')) {
                     const key = 路径.substring(1);
                     if (key) {
@@ -62,6 +51,18 @@ export default {
                         }
                     }
                 }
+
+                if (env.URL302) {
+                    return Response.redirect(env.URL302, 302);
+                } else if (env.URL) {
+                    return await 代理URL(env.URL, url);
+                } else if (路径 === '/') {
+                    return new Response(await nginx(), {
+                        status: 200,
+                        headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+                    });
+                }
+
             } else {
                 socks5Address = url.searchParams.get('socks5') || url.searchParams.get('http') || socks5Address;
                 enableHttp = url.searchParams.get('http') ? true : enableHttp;

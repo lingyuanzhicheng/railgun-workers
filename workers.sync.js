@@ -162,17 +162,6 @@ export default {
                     }
                 } else {
                     // 处理其他路径
-                    if (env.URL302) {
-                        return Response.redirect(env.URL302, 302);
-                    } else if (env.URL) {
-                        return await 代理URL(env.URL, url);
-                    } else if (路径 === '/') {
-                        return new Response(await nginx(), {
-                            status: 200,
-                            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
-                        });
-                    }
-
                     if (!路径.startsWith('/socks5://') && !路径.startsWith('/http://') && !路径.includes('proxyip')) {
                         const key = 路径.substring(1);
                         if (key) {
@@ -186,6 +175,18 @@ export default {
                             }
                         }
                     }
+
+                    if (env.URL302) {
+                        return Response.redirect(env.URL302, 302);
+                    } else if (env.URL) {
+                        return await 代理URL(env.URL, url);
+                    } else if (路径 === '/') {
+                        return new Response(await nginx(), {
+                            status: 200,
+                            headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+                        });
+                    }
+                    
                 }
 
             } else {
