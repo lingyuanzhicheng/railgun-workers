@@ -6,10 +6,11 @@ Railgun 是一套基于 Cloudflare Workers 的轻量级代理服务脚本集合�
 
 ## 📋 版本概述
 
-| 文件名 | 特点说明 | 支持 |
+| 文件名 | 特点说明 | 最新 |
 |-------------------|------------------------------------|----|
-| `workers.lite.js` | 支持通过 `/proxyip=` 使用地区代码    |✅|
-| `workers.core.js` | 仅保留 `/proxyip://` 类型代理支持    |✅|
+| `workers.nano.js` | 加入了使用量接口与子路径代理请求      |✅|
+| `workers.lite.js` | 支持通过 `/proxyip=` 使用地区代码    |❌|
+| `workers.core.js` | 仅保留 `/proxyip://` 类型代理支持    |❌|
 | `workers.sync.js` | 支持 `/sync` 端口远程管理 UUID       |❌|
 | `workers.kv.js`   | 支持 KV 数据库方式配置多 UUID        |❌|
 | `workers.js`      | 基础代理功能，支持多种代理配置方式    |❌|
@@ -17,6 +18,31 @@ Railgun 是一套基于 Cloudflare Workers 的轻量级代理服务脚本集合�
 ---
 
 ## 📄 各版本详细说明
+
+### workers.nano.js
+
+**简介**：在 `workers.lite.js` 基础上增加通过 `/reprequests` 路径获取 Cloudflare Workers AND Pages Functions 调用次数。移除了URL环境变量，仅保留URL302环境变量。加入 `/proxy/` 路径来代理请求指定地址，可用于加速下载文件。
+
+**可用参数**：
+- `URL302`（可选）：自定义 302 跳转目标地址
+- `APIKEY`（可选）：Sync API 访问密钥
+- `ProxyIPGroup`（可选）：ProxyIP分组数据文件夹源
+- `AccountID`（可选）：Cloudflare 的 AccountID
+- `APIToken`（可选）：Cloudflare 的 APIToken
+
+**支持的代理配置方式**：
+```
+/proxyip://proxyip.cmliussss.net
+/proxyip=CN
+```
+
+**参数说明**
+- `URL302` 参数如果指定，则访问根路径时会做302跳转到指定网址。如果不指定则访问根路径显示仿NGINX默认页。
+- `/reprequests` 路径获取 Cloudflare Workers AND Pages Functions 调用次数，依赖于 `AccountID` 与 `APIToken` 的值作为访问 Cloudflare GraphQL API 凭据。
+- 如需需要通过 `/proxyip=` 方式使用指定地区代码来获取随机 ProxyIP 的话，必须设置 `ProxyIPGroup` 环境变量。（可使用我的 [railgun-ipsync/proxyip/data](https://github.com/lingyuanzhicheng/railgun-ipsync/tree/main/proxyip/data) 仓库作为远程 ProxyIP 文件夹： `https://raw.githubusercontent.com/lingyuanzhicheng/railgun-ipsync/refs/heads/main/proxyip/data` ）
+- 如需使用 Sync API 来远程管理 UUID 信息，必须设置 `APIKEY` 作为API的访问密钥。
+
+---
 
 ### workers.lite.js
 
@@ -34,6 +60,11 @@ Railgun 是一套基于 Cloudflare Workers 的轻量级代理服务脚本集合�
 /proxyip=CN
 ```
 
+**参数说明**
+- `URL302` 参数如果指定，则访问根路径时会做302跳转到指定网址。如果不指定则检查是否设定 `URL` 参数。如果设定了 `URL` 参数，则将 `URL` 参数设定的网址作为根路径反代。如果 `URL` 参数也没设定，则访问根路径显示仿NGINX默认页。
+- 如需需要通过 `/proxyip=` 方式使用指定地区代码来获取随机 ProxyIP 的话，必须设置 `ProxyIPGroup` 环境变量。（可使用我的 [railgun-ipsync/proxyip/data](https://github.com/lingyuanzhicheng/railgun-ipsync/tree/main/proxyip/data) 仓库作为远程 ProxyIP 文件夹： `https://raw.githubusercontent.com/lingyuanzhicheng/railgun-ipsync/refs/heads/main/proxyip/data` ）
+- 如需使用 Sync API 来远程管理 UUID 信息，必须设置 `APIKEY` 作为API的访问密钥。
+
 ---
 
 ### workers.core.js
@@ -49,6 +80,10 @@ Railgun 是一套基于 Cloudflare Workers 的轻量级代理服务脚本集合�
 ```
 /proxyip://proxyip.cmliussss.net
 ```
+
+**参数说明**
+- `URL302` 参数如果指定，则访问根路径时会做302跳转到指定网址。如果不指定则检查是否设定 `URL` 参数。如果设定了 `URL` 参数，则将 `URL` 参数设定的网址作为根路径反代。如果 `URL` 参数也没设定，则访问根路径显示仿NGINX默认页。
+- 如需使用 Sync API 来远程管理 UUID 信息，必须设置 `APIKEY` 作为API的访问密钥。
 
 ---
 
@@ -69,6 +104,10 @@ proxyip.cmliussss.net
 /socks5://user:password@127.0.0.1:1080
 /http://user:password@127.0.0.1:8080
 ```
+
+**参数说明**
+- `URL302` 参数如果指定，则访问根路径时会做302跳转到指定网址。如果不指定则检查是否设定 `URL` 参数。如果设定了 `URL` 参数，则将 `URL` 参数设定的网址作为根路径反代。如果 `URL` 参数也没设定，则访问根路径显示仿NGINX默认页。
+- 如需使用 Sync API 来远程管理 UUID 信息，必须设置 `APIKEY` 作为API的访问密钥。
 
 ---
 
@@ -188,7 +227,7 @@ curl -X POST https://example.workers.dev/sync \
 
 ---
 
-## 📜 说明
+## 📜 说明汇总
 
 - 对于非强制性的参数，我都备注的可选。只要影响到使用的才写的必须。
 - 如果 `URL302` 设置了则访问绑定域名根路径的时候会302跳转到设置的地址。
@@ -201,6 +240,7 @@ curl -X POST https://example.workers.dev/sync \
 - 使用 Cloudflare Workers 的代理在访问非 Cloudflare CDN 下的网站时，其出口是用户连接的 Cloudflare 的服务器地区。由于 Cloudflare 的机制，无法访问 Cloudflare CDN 下的网站，故此需要 ProxyIP 来中转。所以在访问 Cloudflare CDN 下的网站时，出口是 ProxyIP 的地区。
 - ProxyIP 的参数授予逻辑是先根据访问的目标 Cloudflare 服务器的 `colo` 从 `*.proxyip.cmliussss.net` 中获取。然后检查是不是 `/proxyip://` 方式指定了目标服务器，再检查是不是 `/proxyip=` 方式指定的目标地区。即先是设置为 `*.proxyip.cmliussss.net` 了。后续被检查 ProxyIP
  的传入进行覆盖。如果想要使用内置的 `*.proxyip.cmliussss.net` 方式，则不设置 path 值，即不传入 ProxyIP 值。使用`*.proxyip.cmliussss.net` 方式的话，访问的不论是不是 Cloudflare CDN 下的网站都是当前用户连接的 Cloudflare 的服务器所在地区出口。
+ - `/reprequests` 路径获取 Cloudflare Workers AND Pages Functions 调用次数，依赖于 `AccountID` 与 `APIToken` 的值作为访问 Cloudflare GraphQL API 凭据。
  
 ---
 
